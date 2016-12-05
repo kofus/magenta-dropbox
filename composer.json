@@ -1,0 +1,12 @@
+{
+    "name": "kofus/magenta-dropbox",
+    "type": "library",
+    
+    "autoload": {
+        "psr-0": {
+            "Kofus\\Dropbox\\": "src/Kofus/Dropbox/"
+        },
+        "classmap" : ["Kofus/Dropbox/Module.php"]
+    }
+}
+
