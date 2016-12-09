@@ -45,7 +45,7 @@ return array(
             )
         )
     ),
-    
+    /*
     'doctrine' => array(
         'driver' => array(
             __NAMESPACE__ . '_driver' => array(
@@ -61,7 +61,7 @@ return array(
                 )
             )
         )
-    ),
+    ), */
     
     'controller_plugins' => array(
         'invokables' => array()
