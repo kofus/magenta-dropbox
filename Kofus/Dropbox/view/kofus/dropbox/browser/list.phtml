@@ -1,0 +1,32 @@
+<div class="row">
+    <div class="col-md-12">
+        <?php if (count($this->entries)) : ?>
+            <table class="table">
+                <?php foreach ($this->entries as $entry) : ?>
+                    <tr>
+                        <td>
+                            <?php
+
+                                switch ($entry['.tag']) {
+                                    case 'folder':
+                                        $glyphicon = 'folder-open';
+                                        break;
+                                    default:
+                                        $glyphicon = 'file';
+                                }
+                            
+                            ?>
+                            <span class="glyphicon glyphicon-<?php echo $glyphicon ?>"></span>&nbsp;
+                            <?php echo $entry['path_display'] ?>
+                        </td>
+                        <td>
+                            <?php if (isset($entry['server_modified'])) echo $entry['server_modified'] ?>
+                        </td>
+                    </tr>
+                <?php endforeach ?>
+            </table>
+        <?php else : ?>
+            <p><?php echo $this->translate('No entries.') ?></p>
+        <?php endif ?>
+    </div>
+</div>

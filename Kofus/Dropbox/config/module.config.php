@@ -4,14 +4,12 @@ namespace Kofus\Dropbox;
 return array(
     'controllers' => array(
         'invokables' => array(
-            'Kofus\Calendar\Controller\Index' => 'Kofus\Calendar\Controller\IndexController',
-            'Kofus\Calendar\Controller\Calendar' => 'Kofus\Calendar\Controller\CalendarController'
+            'Kofus\Dropbox\Controller\Browser' => 'Kofus\Dropbox\Controller\BrowserController'
         )
     ),
     'user' => array(
         'controller_mappings' => array(
-            'Kofus\Calendar\Controller\Index' => 'Frontend',
-            'Kofus\Calendar\Controller\Calendar' => 'Backend'
+            'Kofus\Dropbox\Controller\Browser' => 'KofusDropbox'
         )
     ),
     
@@ -28,11 +26,11 @@ return array(
                     ),
                     'defaults' => array(
                         'language' => 'de',
-                        '__NAMESPACE__' => 'Kofus\Calendar\Controller'
+                        '__NAMESPACE__' => 'Kofus\Dropbox\Controller'
                     )
-                ),
-                'may_terminate' => true
+                )
             )
+            
         )
     ),
     
@@ -64,12 +62,14 @@ return array(
     ), */
     
     'controller_plugins' => array(
-        'invokables' => array()
+        'invokables' => array(
+            'dropbox' => 'Kofus\Dropbox\Controller\Plugin\DropboxPlugin'
+        )
     ),
     
     'service_manager' => array(
         'invokables' => array(
-            'KofusCalendarService' => 'Kofus\Calendar\Service\CalendarService'
+            'KofusDropboxService' => 'Kofus\Dropbox\Service\DropboxService'
         )
     ),
     
