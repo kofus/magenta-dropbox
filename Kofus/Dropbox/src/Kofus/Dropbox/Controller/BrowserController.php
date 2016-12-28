@@ -34,17 +34,35 @@ class BrowserController extends AbstractActionController
         		'recursive' => true,
         		'include_media_info' => true
         ));
+        
+        $finfo = finfo_open(FILEINFO_MIME);
+        
+        
         foreach ($response['entries'] as $entry) {
-           
-            $filename = 'data/dropbox' . $entry['path_lower'];
-            if (! file_exists($filename)) {
-                $tmp = $this->dropbox()->api('files/download', array(
-                	'path' => $entry['id']
-                ));
-                print_r($tmp); die();
+            if ($entry['.tag'] != 'file') continue;
+            print $entry['id']; 
+            
+            $content = $this->dropbox()->content('files/download', array('path' => $entry['id']));
+            $filename = 'data/media/uploads/' . md5($entry['id']);
+            file_put_contents($filename, $content);
+            $mimeType = finfo_file($finfo, $filename);
+            
+            $entity = $this->nodes()->getRepository('DROPIMG')->findOneBy(array('dropboxEntryId' => $entry['id']));
+            if (! $entity)
+                $entity = new \Kofus\Dropbox\Entity\DropboxImageEntity();
+            $entity->setDropboxEntryId($entry['id']);
+            $entity->setDropboxMediaInfo($entry);
+            $entity->setFilename(md5($entry['id']));
+            $entity->setFilesize($entry['size']);
+            if (isset($entry['media_info']['metadata']['dimensions'])) {
+                $entity->setHeight($entry['media_info']['metadata']['dimensions']['height']);
+                $entity->setWidth($entry['media_info']['metadata']['dimensions']['width']);
             }
-            print $filename . '<br>'; 
+            $entity->setMimeType($mimeType);
+
+            $this->em()->persist($entity);
         }
+        $this->em()->flush();
         die();
     }
     

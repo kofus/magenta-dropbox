@@ -15,19 +15,36 @@ class DropboxService extends AbstractService
     
     protected $apiUrls = array(
         
-        'default' => 'https://api.dropboxapi.com/2/',
-        'files/download' => 'https://content.dropboxapi.com/2/'
+        'api' => 'https://api.dropboxapi.com/2/',
+        'content' => 'https://content.dropboxapi.com/2/'
     );
+    
+    public function content($method, array $params=array())
+    {
+        $client = $this->getHttpClient();
+        $client->setUri($this->apiUrls['content'] . '/' . $method);
+        $headers = new Headers();
+        $headers->addHeader(new Header\Authorization('Bearer ' . $this->getAccessToken()));
+        $headers->addHeader(new Header\GenericHeader('Dropbox-API-Arg', Json::encode($params)));
+        $headers->addHeader(new Header\ContentType(''));
+
+        $client->setHeaders($headers);
+        $client->setMethod('POST');
+
+        $response = $client->send();
+        $archive = $this->getServiceLocator()->get('KofusArchiveService');
+        $archive->http('dropbox')->add($client);
+        
+        if ($response->getStatusCode() >= 300)
+        	throw new \Exception('Dropbox API Exception: ' . $response->getContent());
+        return $response->getContent();
+        
+    }
 
     public function api($method, array $params=array())
     {
         $client = $this->getHttpClient();
-        if (isset($this->apiUrls[$method])) {
-            $url = $this->apiUrls[$method];
-        } else {
-            $url = $this->apiUrls['default'];
-        }
-        $client->setUri($url . '/' . $method);
+        $client->setUri($this->apiUrls['api'] . '/' . $method);
         $headers = new Headers();
         $headers->addHeader(new Header\Authorization('Bearer ' . $this->getAccessToken()));
         $headers->addHeader(new Header\ContentType('application/json'));
@@ -40,8 +57,8 @@ class DropboxService extends AbstractService
         $archive->http('dropbox')->add($client);
         
         if ($response->getStatusCode() >= 300)
-            throw new \Exception('Dropbox API Exception');
-        $body = $response->getBody();
+            throw new \Exception('Dropbox API Exception: ' . $response->getContent());
+        $body = $response->getContent();
        	if ($body)
         	return Json::decode($response->getBody(), 1);
     }

@@ -6,18 +6,29 @@
                     <tr>
                         <td>
                             <?php
-
                                 switch ($entry['.tag']) {
                                     case 'folder':
                                         $glyphicon = 'folder-open';
                                         break;
                                     default:
+                                        if (isset($entry['media_info']['metadata']['.tag']))
+                                            echo $entry['media_info']['metadata']['.tag'];
                                         $glyphicon = 'file';
                                 }
-                            
                             ?>
-                            <span class="glyphicon glyphicon-<?php echo $glyphicon ?>"></span>&nbsp;
-                            <?php echo $entry['path_display'] ?>
+                            <span class="glyphicon glyphicon-<?php echo $glyphicon ?>"></span>
+                        </td>
+                        <td>
+                            <?php echo $this->escapeHtml($entry['name']) ?>
+                        </td>
+                        <td>
+                            <?php echo $this->escapeHtml($entry['id']) ?>
+      
+                        </td>
+                        <td>
+                            
+                            &nbsp;
+                            <?php echo $entry['path_lower'] ?>
                         </td>
                         <td>
                             <?php if (isset($entry['server_modified'])) echo $entry['server_modified'] ?>
