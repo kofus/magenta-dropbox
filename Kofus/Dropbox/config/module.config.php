@@ -2,6 +2,7 @@
 namespace Kofus\Dropbox;
 
 return array(
+    /*
     'controllers' => array(
         'invokables' => array(
             'Kofus\Dropbox\Controller\Browser' => 'Kofus\Dropbox\Controller\BrowserController'
@@ -12,7 +13,7 @@ return array(
             'Kofus\Dropbox\Controller\Browser' => 'KofusDropbox'
         )
     ),
-    
+    */
     'router' => array(
         'routes' => array(
             'kofus_dropbox' => array(
@@ -26,7 +27,9 @@ return array(
                     ),
                     'defaults' => array(
                         'language' => 'de',
-                        '__NAMESPACE__' => 'Kofus\Dropbox\Controller'
+                        '__NAMESPACE__' => 'Kofus\Dropbox\Controller',
+                        'controller' => 'browser',
+                        'action' => 'list'
                     )
                 )
             )
@@ -69,7 +72,8 @@ return array(
     
     'service_manager' => array(
         'invokables' => array(
-            'KofusDropboxService' => 'Kofus\Dropbox\Service\DropboxService'
+            'KofusDropboxService' => 'Kofus\Dropbox\Service\DropboxService',
+            'KofusDropboxSyncCron' => 'Kofus\Dropbox\Cron\DropboxSyncCron',
         )
     ),
     

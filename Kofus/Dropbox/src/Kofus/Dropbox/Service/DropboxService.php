@@ -71,6 +71,99 @@ class DropboxService extends AbstractService
         return $accessToken;
     }
     
+    const SYNC_MODE_ADD = 2;
+    const SYNC_MODE_UPDATE = 3;
+    const SYNC_MODE_DELETE = 5;
+    
+    public function sync(array $options=array())
+    {
+        // Deploy option defaults
+        if (! isset($options['mode'])) 
+            $options['mode'] = self::SYNC_MODE_ADD * self::SYNC_MODE_UPDATE;
+        if (! isset($options['repository']))
+            throw new \Exception('A media file node type must be provided for storing Dropbox files');        
+        
+    	$response = $this->api('files/list_folder', array(
+    			'path' => '',
+    			'recursive' => true,
+    			'include_media_info' => true
+    	));
+    	
+    	$validator = new \Zend\Validator\ValidatorChain();
+    	if (isset($options['validators'])) {
+    	   foreach ($options['validators'] as $array) {
+    	       if (! isset($array['options'])) $array['options'] = array();
+    	       $validator->attachByName($array['name'], $array['options']);
+    	   }
+    	}
+    
+    	$finfo = finfo_open(FILEINFO_MIME);
+    	$entities = array();
+    	$entries = array();
+    	$messages = array();
+    	
+
+    
+    	foreach ($response['entries'] as $entry) {
+    
+    	    // Skip irrelevant entries according to provided validator
+   	        if (! $validator->isValid($entry)) continue;
+   	        
+   	        
+    		$entries[$entry['id']] = $entry;
+    
+    		$entity = $this->nodes()->getRepository($options['repository'])->findOneBy(array('dropboxEntryId' => $entry['id']));
+    		if ($entity && $entity->getDropboxRevision() == $entry['rev'])
+    			continue;
+    
+    		// Download
+    		$messages[] = 'Downloading ' . $entry['path_lower'];
+    
+    		$filename = 'data/media/uploads/' . md5($entry['id']);
+    		$content = $this->content('files/download', array('path' => $entry['id']));
+    		file_put_contents($filename, $content);
+    		$mimeType = finfo_file($finfo, $filename);
+    
+    		// Create entity
+    		if (! $entity) {
+    			$messages[] = 'Adding ' . $entry['path_lower'];
+    			$entity = $this->nodes()->createNode($options['repository']);
+    		}
+    
+    		// Update entity
+    		$messages[] = 'Updating ' . $entry['path_lower'];
+    		$entity->setDropboxEntryId($entry['id'])
+        		->setDropboxMediaInfo($entry)
+        		->setFilename(md5($entry['id']))
+        		->setFilesize($entry['size'])
+        		->setDropboxRevision($entry['rev'])
+        		->setDropboxTimestampModified(new \DateTime());
+    		if (isset($entry['media_info']['metadata']['dimensions'])) {
+    			$entity->setHeight($entry['media_info']['metadata']['dimensions']['height']);
+    			$entity->setWidth($entry['media_info']['metadata']['dimensions']['width']);
+    		}
+    		$entity->setMimeType($mimeType);
+    		$this->em()->persist($entity);
+    		 
+    		$entities[$entry['id']] = $entity;
+    	}
+    	$this->em()->flush();
+    
+    	// Delete
+    	foreach ($this->nodes()->getRepository($options['repository'])->findAll() as $entity) {
+    		if (! isset($entries[$entity->getDropboxEntryId()])) {
+    			$messages[] = 'Deleting ' . $entity->getDropboxEntryId();
+    			unlink($entity->getPath());
+    			$this->getServiceLocator()->get('KofusMediaService')->clearCache($entity);
+    			$this->nodes()->deleteNode($entity);
+    		}
+    	}
+    	
+    	return $messages;
+    
+    
+    }
+    
    
     
     protected function getHttpClient()

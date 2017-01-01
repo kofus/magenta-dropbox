@@ -25,7 +25,21 @@ class DropboxImageEntity extends ImageEntity
     {
         return $this->dropboxEntryId;
     }
+
+    /**
+     * @ORM\Column()
+     */
+    protected $dropboxRevision;
     
+    public function setDropboxRevision($value)
+    {
+    	$this->dropboxRevision = $value; return $this;
+    }
+    
+    public function getDropboxRevision()
+    {
+    	return $this->dropboxRevision;
+    }
     
     
     /**
@@ -41,6 +55,21 @@ class DropboxImageEntity extends ImageEntity
     public function getDropboxMediaInfo()
     {
     	return $this->dropboxMediaInfo;
+    }
+    
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $dropboxTimestampModified;
+    
+    public function setDropboxTimestampModified(\DateTime $datetime)
+    {
+    	$this->dropboxTimestampModified = $datetime; return $this;
+    }
+    
+    public function getDropboxTimestampModified()
+    {
+    	return $this->dropboxTimestampModified;
     }
     
   
