@@ -119,9 +119,16 @@ class DropboxService extends AbstractService
     		// Download
     		$messages[] = 'Downloading ' . $entry['path_lower'];
     
-    		$filename = 'data/media/uploads/' . md5($entry['id']);
+    		$filename = 'data/media/files/' . md5($entry['id']);
     		$content = $this->content('files/download', array('path' => $entry['id']));
-    		file_put_contents($filename, $content);
+    		if (! is_dir(dirname($filename))) {
+    		    $success = mkdir(dirname($filename), 0777, true);
+    		    if ($success === false)
+    		        throw new \Exception('Could not create directory ' . dirname($filename));
+    		}
+    		$success = file_put_contents($filename, $content);
+    		if ($success === false)
+    		    throw new \Exception('Could not write file ' . $filename);
     		$mimeType = finfo_file($finfo, $filename);
     
     		// Create entity
@@ -136,6 +143,7 @@ class DropboxService extends AbstractService
         		->setDropboxMediaInfo($entry)
         		->setFilename(md5($entry['id']))
         		->setFilesize($entry['size'])
+        		->setDropboxPath($entry['path_lower'])
         		->setDropboxRevision($entry['rev'])
         		->setDropboxTimestampModified(new \DateTime());
     		if (isset($entry['media_info']['metadata']['dimensions'])) {

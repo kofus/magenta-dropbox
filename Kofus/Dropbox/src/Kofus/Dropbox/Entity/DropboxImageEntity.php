@@ -25,6 +25,22 @@ class DropboxImageEntity extends ImageEntity
     {
         return $this->dropboxEntryId;
     }
+    
+    /**
+     * @ORM\Column()
+     */
+    protected $dropboxPath;
+    
+    public function setDropboxPath($value)
+    {
+    	$this->dropboxPath = $value; return $this;
+    }
+    
+    public function getDropboxPath()
+    {
+    	return $this->dropboxPath;
+    }
+    
 
     /**
      * @ORM\Column()
