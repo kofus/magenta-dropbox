@@ -12,7 +12,6 @@ use Kofus\System\Service\AbstractService;
 
 class DropboxService extends AbstractService
 {
-    
     protected $apiUrls = array(
         
         'api' => 'https://api.dropboxapi.com/2/',
@@ -101,8 +100,6 @@ class DropboxService extends AbstractService
     	$entities = array();
     	$entries = array();
     	$messages = array();
-    	
-
     
     	foreach ($response['entries'] as $entry) {
     
@@ -152,10 +149,11 @@ class DropboxService extends AbstractService
     		}
     		$entity->setMimeType($mimeType);
     		$this->em()->persist($entity);
+    		$this->em()->flush();
+    		
     		 
     		$entities[$entry['id']] = $entity;
     	}
-    	$this->em()->flush();
     
     	// Delete
     	foreach ($this->nodes()->getRepository($options['repository'])->findAll() as $entity) {
