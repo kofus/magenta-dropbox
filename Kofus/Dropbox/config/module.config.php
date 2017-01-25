@@ -2,38 +2,38 @@
 namespace Kofus\Dropbox;
 
 return array(
-    /*
+    
     'controllers' => array(
         'invokables' => array(
-            'Kofus\Dropbox\Controller\Browser' => 'Kofus\Dropbox\Controller\BrowserController'
+            'Kofus\Dropbox\Controller\Browser' => 'Kofus\Dropbox\Controller\BrowserController',
+            'Kofus\Dropbox\Controller\Auth' => 'Kofus\Dropbox\Controller\AuthController',
         )
     ),
     'user' => array(
         'controller_mappings' => array(
-            'Kofus\Dropbox\Controller\Browser' => 'KofusDropbox'
+            'Kofus\Dropbox\Controller\Browser' => 'KofusDropbox',
+            'Kofus\Dropbox\Controller\Auth' => 'KofusDropbox',
+            
         )
     ),
-    */
+    
     'router' => array(
         'routes' => array(
             'kofus_dropbox' => array(
                 'type' => 'Segment',
                 'options' => array(
-                    'route' => '/:language/' . KOFUS_ROUTE_SEGMENT . '/dropbox/:controller/:action[/:id[/:id2]]',
+                    'route' => '/:language/' . KOFUS_ROUTE_SEGMENT . '/dropbox[/:controller[/:action[/:id]]]',
                     'constraints' => array(
-                        'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                         'language' => '[a-z][a-z]'
                     ),
                     'defaults' => array(
                         'language' => 'de',
                         '__NAMESPACE__' => 'Kofus\Dropbox\Controller',
                         'controller' => 'browser',
-                        'action' => 'list'
+                        'action' => 'index',
                     )
                 )
             )
-            
         )
     ),
     
