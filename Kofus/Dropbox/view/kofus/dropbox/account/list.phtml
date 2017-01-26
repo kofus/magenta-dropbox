@@ -1,0 +1,44 @@
+<div class="row">
+    <div class="col-md-12">
+        <h1>Dropbox</h1>
+        <p>Nutzen Sie Ihre Dropbox, um Dateien mit diesem System auszutauschen.</p>
+        <p>So funktioniert's:</p>
+        <ol>
+            <li>
+                Geben Sie den Dropbox-Ordner "Apps &gt; KOFUS" für dieses System frei, indem Sie auf folgenden Link klicken:<br>
+                <a target="_blank" href="<?php echo $this->uriDropbox ?>">
+                    <?php echo $this->uriDropbox ?>                
+                </a>
+            </li>
+            <li>
+                Kopieren Sie den Freischalt-Code von Dropbox in folgendes Formular:<br> 
+                <a href="<?php echo $this->url('kofus_system', array('controller' => 'node', 'action' => 'add', 'id' => 'DROPACC')) ?>">
+                    Dropbox-Konto hinzufügen
+                </a>
+            </li>
+            <li>
+                Synchronisieren Sie die Dateien in Ihrem Dropbox-Ordner mit diesem System:<br>
+                <a href="">Jetzt synchronisieren</a>
+            </li>
+        </ol>
+        
+        <?php if ($this->accounts) : ?>
+            <h2>Freigeschaltete Accounts</h2>
+            <table class="table table-hover">
+                <tbody class="rowlink" data-link="row">
+                    <?php foreach ($this->accounts as $account) : ?>
+                        <tr>
+                            <td>
+                                <a href="<?php echo $this->url('kofus_system', array('controller' => 'node', 'action' => 'edit', 'id' => $account->getNodeId())) ?>">
+                                    <?php echo $this->escapeHtml($account->getTitle()) ?>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+        <?php else : ?>
+            <p><?php echo $this->translate('No entries.') ?></p>
+        <?php endif ?>
+    </div>
+</div>

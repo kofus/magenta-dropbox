@@ -6,14 +6,13 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Kofus\Dropbox\Controller\Browser' => 'Kofus\Dropbox\Controller\BrowserController',
-            'Kofus\Dropbox\Controller\Auth' => 'Kofus\Dropbox\Controller\AuthController',
+            'Kofus\Dropbox\Controller\Account' => 'Kofus\Dropbox\Controller\AccountController',
         )
     ),
     'user' => array(
         'controller_mappings' => array(
             'Kofus\Dropbox\Controller\Browser' => 'KofusDropbox',
-            'Kofus\Dropbox\Controller\Auth' => 'KofusDropbox',
-            
+            'Kofus\Dropbox\Controller\Account' => 'KofusDropbox',
         )
     ),
     
