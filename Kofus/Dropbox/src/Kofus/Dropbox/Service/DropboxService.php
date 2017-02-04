@@ -7,7 +7,9 @@ use Zend\Http\Headers;
 use Zend\Json\Json;
 use Zend\Http\Client as HttpClient;
 
+
 use Kofus\System\Service\AbstractService;
+use Kofus\Dropbox\Db\Sqlite\DropboxDb;
 
 
 class DropboxService extends AbstractService
@@ -18,7 +20,7 @@ class DropboxService extends AbstractService
         'content' => 'https://content.dropboxapi.com/2/'
     );
     
-    public function content($method, array $params=array())
+    public function content($method, array $params=array(), $streamFilename=null)
     {
         $client = $this->getHttpClient();
         $client->setUri($this->apiUrls['content'] . '/' . $method);
@@ -29,6 +31,8 @@ class DropboxService extends AbstractService
 
         $client->setHeaders($headers);
         $client->setMethod('POST');
+        if ($streamFilename)
+            $client->setStream($streamFilename);
 
         $response = $client->send();
         $archive = $this->getServiceLocator()->get('KofusArchiveService');
@@ -62,13 +66,71 @@ class DropboxService extends AbstractService
         	return Json::decode($response->getBody(), 1);
     }
     
+    protected $accessToken;
+    
     public function getAccessToken()
     {
-        $accessToken = $this->config()->get('dropbox.access_token');
-        if (! $accessToken)
-            throw new \Exception('No access token found for dropbox');
-        return $accessToken;
+        if (! $this->accessToken)
+            throw new \Exception('Dropbox access token must be provided before first api call');
+        return $this->accessToken;
     }
+    
+    public function setAccessToken($value)
+    {
+        $this->accessToken = $value; return $this;
+    }
+    
+    public function syncDownload()
+    {
+        if (! is_dir('data/dropbox/files')) 
+        	mkdir('data/dropbox/files', 0777, true);
+        
+        $db = DropboxDb::open('data/dropbox/files.db');
+        
+        $response = $this->api('files/list_folder', array(
+        		'path' => $this->config()->get('dropbox.path', ''),
+        		'recursive' => true,
+                'include_deleted' => true,
+        		'include_media_info' => false
+        ));
+        
+        foreach ($response['entries'] as $entry) {
+            $filename = 'data/dropbox/files/' . md5($entry['path_lower']);
+            
+            if ($entry['.tag'] == 'deleted') {
+                $db->deleteLocalFile($entry);
+                if (file_exists($filename)) {
+                    unlink($filename);
+                    print 'Deleted ' . $entry['path_lower'] . '<br>';
+                }
+                
+            } elseif ($entry['.tag'] == 'file') {
+            
+                $local = $db->getLocalFile($entry['path_lower']);
+                
+                // Add + download
+                if (! $local) {
+                    $content = $this->content('files/download', array('path' => $entry['id']));
+                    file_put_contents($filename, $content);
+                    $db->addLocalFile($entry);
+                    print 'Added ' . $entry['path_lower'] . '<br>';
+                    
+                // Update + download
+                } elseif ($local && $local['modified'] < $entry['server_modified']) {
+                    $content = $this->content('files/download', array('path' => $entry['id']));
+                    file_put_contents($filename, $content);
+                    $db->updateLocalFile($entry);
+                    print 'Updated ' . $entry['path_lower'] . '<br>';
+                }
+            }
+        }
+
+        foreach ($db->getLocalFiles() as $localfile)
+            print $localfile['path'] . '<br>';
+        
+        die('DONE');
+    }
+    
     
     const SYNC_MODE_ADD = 2;
     const SYNC_MODE_UPDATE = 3;
