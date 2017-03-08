@@ -25,7 +25,7 @@ class DropboxService extends AbstractService
         $client = $this->getHttpClient();
         $client->setUri($this->apiUrls['content'] . '/' . $method);
         $headers = new Headers();
-        $headers->addHeader(new Header\Authorization('Bearer ' . $this->getAccessToken()));
+        $headers->addHeader(new Header\Authorization('Bearer ' . $this->getAccessToken(true)));
         $headers->addHeader(new Header\GenericHeader('Dropbox-API-Arg', Json::encode($params)));
         $headers->addHeader(new Header\ContentType(''));
 
@@ -49,7 +49,7 @@ class DropboxService extends AbstractService
         $client = $this->getHttpClient();
         $client->setUri($this->apiUrls['api'] . '/' . $method);
         $headers = new Headers();
-        $headers->addHeader(new Header\Authorization('Bearer ' . $this->getAccessToken()));
+        $headers->addHeader(new Header\Authorization('Bearer ' . $this->getAccessToken(true)));
         $headers->addHeader(new Header\ContentType('application/json'));
         $client->setHeaders($headers);
         if ($params)
@@ -59,8 +59,10 @@ class DropboxService extends AbstractService
         $archive = $this->getServiceLocator()->get('KofusArchiveService');
         $archive->http('dropbox')->add($client);
         
-        if ($response->getStatusCode() >= 300)
+        if ($response->getStatusCode() >= 300) {
+            print_r($headers->toArray()); die();
             throw new \Exception('Dropbox API Exception: ' . $response->getContent());
+        }
         $body = $response->getContent();
        	if ($body)
         	return Json::decode($response->getBody(), 1);
@@ -68,16 +70,27 @@ class DropboxService extends AbstractService
     
     protected $accessToken;
     
-    public function getAccessToken()
+    public function getAccessToken($throwException=false)
     {
-        if (! $this->accessToken)
+        if (! $this->accessToken) {
+            $settings = $this->getServiceLocator()->get('KofusSettings');
+            $this->accessToken = $settings->getSystemValue('kofus_dropbox.access_token');
+        }
+        
+        if ($throwException && ! $this->accessToken)
             throw new \Exception('Dropbox access token must be provided before first api call');
+        
         return $this->accessToken;
     }
     
     public function setAccessToken($value)
     {
-        $this->accessToken = $value; return $this;
+        $this->accessToken = $value;
+        
+        $settings = $this->getServiceLocator()->get('KofusSettings');
+        $settings->setSystemValue('kofus_dropbox.access_token', $value);
+        
+        return $this;
     }
     
     public function syncDownload()
@@ -168,7 +181,6 @@ class DropboxService extends AbstractService
     	    // Skip irrelevant entries according to provided validator
    	        if (! $validator->isValid($entry)) continue;
    	        
-   	        
     		$entries[$entry['id']] = $entry;
     
     		$entity = $this->nodes()->getRepository($options['repository'])->findOneBy(array('dropboxEntryId' => $entry['id']));
@@ -230,6 +242,14 @@ class DropboxService extends AbstractService
     	return $messages;
     
     
+    }
+    
+    public function getImages($path)
+    {
+        $qb = $this->nodes()->createQueryBuilder('DROPIMG');
+        $qb->where('n.dropboxPath LIKE :path')
+            ->setParameter('path', $path . '/%');
+        return $qb->getQuery()->getResult();
     }
     
    

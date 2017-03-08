@@ -6,13 +6,13 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Kofus\Dropbox\Controller\Browser' => 'Kofus\Dropbox\Controller\BrowserController',
-            'Kofus\Dropbox\Controller\Account' => 'Kofus\Dropbox\Controller\AccountController',
+            'Kofus\Dropbox\Controller\Index' => 'Kofus\Dropbox\Controller\IndexController',
         )
     ),
     'user' => array(
         'controller_mappings' => array(
             'Kofus\Dropbox\Controller\Browser' => 'KofusDropbox',
-            'Kofus\Dropbox\Controller\Account' => 'KofusDropbox',
+            'Kofus\Dropbox\Controller\Index' => 'KofusDropbox',
         )
     ),
     
@@ -28,7 +28,7 @@ return array(
                     'defaults' => array(
                         'language' => 'de',
                         '__NAMESPACE__' => 'Kofus\Dropbox\Controller',
-                        'controller' => 'browser',
+                        'controller' => 'index',
                         'action' => 'index',
                     )
                 )

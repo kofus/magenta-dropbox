@@ -28,7 +28,7 @@
                         <?php echo $this->escapeHtml($entry['id']) ?>
                     </td>
                     <td>
-                    <?php if ('folder' == $glyphicon) : ?>
+                    <?php if ('folder-open' == $glyphicon) : ?>
                         <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'browser', 'action' => 'index', 'id' => urlencode($entry['path_lower']))) ?>">
                             <span class="glyphicon glyphicon-arrow-right"></span>
                         </a>

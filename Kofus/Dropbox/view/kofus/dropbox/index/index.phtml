@@ -1,0 +1,22 @@
+<h1><span class="fa fa-dropbox"></span> Dropbox</h1>
+<?php if ($this->dropbox->getAccessToken()) : ?>
+    <div class="panel panel-success">
+        <div class="panel-body">
+            <p>Das System ist mit einem Dropbox-Account verknüpft.</p>
+            <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'index', 'action' => 'accesstoken')) ?>" class="btn btn-default" >Bearbeiten</a>
+            <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'browser')) ?>" class="btn btn-default">Dateien</a>  
+              
+        </div>
+    </div>
+<?php else : ?>
+    <div class="panel panel-danger">
+        <div class="panel-body">
+            <p>Das System ist noch mit keiner Dropbox verbunden.</p>
+            <p>Generieren Sie jetzt einen Freischalt-Code über die Dropbox-Website und hinterlegen Sie ihn in diesem System.</p>
+            <a href="<?php echo $this->escapeHtmlAttr($this->uriDropbox) ?>" class="btn btn-default" target="_blank">Code erstellen</a>
+            <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'index', 'action' => 'accesstoken')) ?>" class="btn btn-default">Code speichern</a>  
+              
+        </div>
+    </div>
+
+<?php endif ?>
