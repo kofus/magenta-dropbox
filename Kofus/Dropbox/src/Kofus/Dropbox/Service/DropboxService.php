@@ -95,6 +95,7 @@ class DropboxService extends AbstractService
     
     public function syncDownload()
     {
+        die('sync download');
         if (! is_dir('data/dropbox/files')) 
         	mkdir('data/dropbox/files', 0777, true);
         
@@ -174,9 +175,10 @@ class DropboxService extends AbstractService
     	$finfo = finfo_open(FILEINFO_MIME);
     	$entities = array();
     	$entries = array();
-    	$messages = array();
     
     	foreach ($response['entries'] as $entry) {
+    	    
+    	    print 'Checking ' . $entry['path_lower'] . "\n";
     
     	    // Skip irrelevant entries according to provided validator
    	        if (! $validator->isValid($entry)) continue;
@@ -188,7 +190,7 @@ class DropboxService extends AbstractService
     			continue;
     
     		// Download
-    		$messages[] = 'Downloading ' . $entry['path_lower'];
+    		print 'Downloading ' . $entry['path_lower'] . "\n";
     
     		$filename = 'data/media/files/' . md5($entry['id']);
     		$content = $this->content('files/download', array('path' => $entry['id']));
@@ -204,12 +206,12 @@ class DropboxService extends AbstractService
     
     		// Create entity
     		if (! $entity) {
-    			$messages[] = 'Adding ' . $entry['path_lower'];
+    			print 'Adding ' . $entry['path_lower'] . "\n";
     			$entity = $this->nodes()->createNode($options['repository']);
     		}
     
     		// Update entity
-    		$messages[] = 'Updating ' . $entry['path_lower'];
+    		print 'Updating ' . $entry['path_lower'] . "\n";
     		$entity->setDropboxEntryId($entry['id'])
         		->setDropboxMediaInfo($entry)
         		->setFilename(md5($entry['id']))
@@ -232,16 +234,15 @@ class DropboxService extends AbstractService
     	// Delete
     	foreach ($this->nodes()->getRepository($options['repository'])->findAll() as $entity) {
     		if (! isset($entries[$entity->getDropboxEntryId()])) {
-    			$messages[] = 'Deleting ' . $entity->getDropboxEntryId();
+    			print 'Deleting ' . $entity->getDropboxEntryId() . "\n";
     			unlink($entity->getPath());
     			$this->getServiceLocator()->get('KofusMediaService')->clearCache($entity);
     			$this->nodes()->deleteNode($entity);
     		}
     	}
     	
-    	return $messages;
-    
-    
+    	return array();
+    	
     }
     
     public function getImages($path)
