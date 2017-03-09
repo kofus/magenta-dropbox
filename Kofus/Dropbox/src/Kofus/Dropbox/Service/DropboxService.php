@@ -35,8 +35,8 @@ class DropboxService extends AbstractService
             $client->setStream($streamFilename);
 
         $response = $client->send();
-        $archive = $this->getServiceLocator()->get('KofusArchiveService');
-        $archive->http('dropbox')->add($client);
+        //$archive = $this->getServiceLocator()->get('KofusArchiveService');
+        //$archive->http('dropbox')->add($client);
         
         if ($response->getStatusCode() >= 300)
         	throw new \Exception('Dropbox API Exception: ' . $response->getContent());
