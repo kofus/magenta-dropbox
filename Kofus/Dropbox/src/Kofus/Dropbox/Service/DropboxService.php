@@ -178,7 +178,7 @@ class DropboxService extends AbstractService
     
     	foreach ($response['entries'] as $entry) {
     	    
-    	    print 'Checking ' . $entry['path_lower'] . "\n";
+    	    print '.';
     
     	    // Skip irrelevant entries according to provided validator
    	        if (! $validator->isValid($entry)) continue;

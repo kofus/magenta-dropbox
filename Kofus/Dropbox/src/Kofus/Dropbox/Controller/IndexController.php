@@ -14,16 +14,31 @@ class IndexController extends AbstractActionController
     {
         $this->archive()->uriStack()->push();
         
+        $view = new ViewModel(array(
+        	'dropbox' => $this->dropbox()
+        ));
+        
+        // uri dropbox
         $uriDropbox = UriFactory::factory('https://www.dropbox.com/oauth2/authorize');
         $uriDropbox->setQuery(array(
         		'response_type' => 'code',
         		'client_id' => 'pryff6oayqwpevb',
         ));
+        $view->uriDropbox = $uriDropbox;
         
-        return new ViewModel(array(
-            'dropbox' => $this->dropbox(),
-            'uriDropbox' => $uriDropbox
-        ));
+        // folders
+        if ($this->dropbox()->getAccessToken()) {
+            try {
+                $response = $this->dropbox()->api('files/list_folder', array(
+                		'path' => '',
+                		'recursive' => true,
+                		'include_media_info' => false
+                ));
+                $view->response = $response;
+            } catch (\Exception $e) { }
+        }
+        return $view;
+        
     }
     
     public function accesstokenAction()

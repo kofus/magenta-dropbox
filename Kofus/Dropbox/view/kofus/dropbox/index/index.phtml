@@ -1,22 +1,37 @@
 <h1><span class="fa fa-dropbox"></span> Dropbox</h1>
-<?php if ($this->dropbox->getAccessToken()) : ?>
-    <div class="panel panel-success">
-        <div class="panel-body">
-            <p>Das System ist mit einem Dropbox-Account verknüpft.</p>
-            <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'index', 'action' => 'accesstoken')) ?>" class="btn btn-default" >Bearbeiten</a>
-            <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'browser')) ?>" class="btn btn-default">Dateien</a>  
-              
-        </div>
-    </div>
-<?php else : ?>
-    <div class="panel panel-danger">
-        <div class="panel-body">
-            <p>Das System ist noch mit keiner Dropbox verbunden.</p>
-            <p>Generieren Sie jetzt einen Freischalt-Code über die Dropbox-Website und hinterlegen Sie ihn in diesem System.</p>
-            <a href="<?php echo $this->escapeHtmlAttr($this->uriDropbox) ?>" class="btn btn-default" target="_blank">Code erstellen</a>
-            <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'index', 'action' => 'accesstoken')) ?>" class="btn btn-default">Code speichern</a>  
-              
-        </div>
-    </div>
+<div class="jumbotron">
+    <?php if ($this->dropbox->getAccessToken() && isset($this->response)) : ?>
+        <p>Das System ist erfolgreich mit einem Dropbox-Account verbunden.</p>
+        <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'index', 'action' => 'accesstoken')) ?>" class="btn btn-default" >Zugriffs-Code bearbeiten</a>
+        
+    <?php elseif ($this->dropbox->getAccessToken()) :  ?>
+        <p>Warnung: es konnte keine Verbindung zu Dropbox mit dem hinterlegten Zugriffs-Code hergestellt werden.</p>
+        <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'index', 'action' => 'accesstoken')) ?>" class="btn btn-default" >Zugriffs-Code bearbeiten</a>
+        
+    <?php else : ?>
+        <p>Das System ist noch nicht mit einem Dropbox-Account verbunden.</p>
+        <p>Erstellen Sie jetzt einen Zugriffs-Code auf der Dropbox-Website und hinterlegen Sie ihn in diesem System.</p>
+        <a href="<?php echo $this->escapeHtmlAttr($this->uriDropbox) ?>" class="btn btn-default" target="_blank">Code erstellen</a>
+        <a href="<?php echo $this->url('kofus_dropbox', array('controller' => 'index', 'action' => 'accesstoken')) ?>" class="btn btn-default">Code speichern</a>  
+    <?php endif ?>
+</div>
 
+
+<!-- Pfade -->
+<?php if (isset($this->response) && isset($this->response['entries'])) : ?>
+    <div class="row">
+        <div class="col-md-9">
+            <h3>Ordner auf der Dropbox</h3>
+            <table class="table">
+                <?php foreach ($this->response['entries'] as $entry) : ?>
+                    <?php if ($entry['.tag'] != 'folder') continue ?>
+                    <tr>
+                        <td>
+                            <?php echo $this->escapeHtml($entry['path_lower']) ?>
+                        </td>
+                    </tr>
+                <?php endforeach ?>
+            </table>
+        </div>
+    </div>
 <?php endif ?>
