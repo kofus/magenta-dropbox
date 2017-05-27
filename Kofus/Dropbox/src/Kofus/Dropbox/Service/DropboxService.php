@@ -178,22 +178,24 @@ class DropboxService extends AbstractService
     
     	foreach ($response['entries'] as $entry) {
     	    
-    	    print '.';
+    	    //print '.';
     
     	    // Skip irrelevant entries according to provided validator
    	        if (! $validator->isValid($entry)) continue;
    	        
-    		$entries[$entry['id']] = $entry;
+    		$entries[$entry['path_lower']] = $entry;
     
-    		$entity = $this->nodes()->getRepository($options['repository'])->findOneBy(array('dropboxEntryId' => $entry['id']));
-    		if ($entity && $entity->getDropboxRevision() == $entry['rev'])
+    		$entity = $this->nodes()->getRepository($options['repository'])->findOneBy(array('dropboxPath' => $entry['path_lower']));
+    		if ($entity && $entity->getDropboxRevision() == $entry['rev']) {
+    		    print str_pad('SKIP', 15) . $entry['path_lower'] . "\n";
     			continue;
+    		}
     
     		// Download
-    		print 'Downloading ' . $entry['path_lower'] . "\n";
+    		print str_pad('DOWNLOAD', 15) . $entry['path_lower'] . "\n";
     
-    		$filename = 'data/media/files/' . md5($entry['id']);
-    		$content = $this->content('files/download', array('path' => $entry['id']));
+    		$filename = 'data/media/files/' . md5($entry['path_lower']);
+    		$content = $this->content('files/download', array('path' => $entry['path_lower']));
     		if (! is_dir(dirname($filename))) {
     		    $success = mkdir(dirname($filename), 0777, true);
     		    if ($success === false)
@@ -206,15 +208,16 @@ class DropboxService extends AbstractService
     
     		// Create entity
     		if (! $entity) {
-    			print 'Adding ' . $entry['path_lower'] . "\n";
+    			print str_pad('ADD', 15) . $entry['path_lower'] . "\n";
     			$entity = $this->nodes()->createNode($options['repository']);
+    		} else {
+    		    print str_pad('UPDATE', 15) . $entry['path_lower'] . "\n";
     		}
     
     		// Update entity
-    		print 'Updating ' . $entry['path_lower'] . "\n";
-    		$entity->setDropboxEntryId($entry['id'])
+    		$entity->setDropboxEntryId(null)
         		->setDropboxMediaInfo($entry)
-        		->setFilename(md5($entry['id']))
+        		->setFilename(md5($entry['path_lower']))
         		->setFilesize($entry['size'])
         		->setDropboxPath($entry['path_lower'])
         		->setDropboxRevision($entry['rev'])
@@ -228,10 +231,11 @@ class DropboxService extends AbstractService
     		$this->em()->flush();
     		
     		 
-    		$entities[$entry['id']] = $entity;
+    		$entities[$entry['path_lower']] = $entity;
     	}
     
     	// Delete
+    	/*
     	foreach ($this->nodes()->getRepository($options['repository'])->findAll() as $entity) {
     		if (! isset($entries[$entity->getDropboxEntryId()])) {
     			print 'Deleting ' . $entity->getDropboxEntryId() . "\n";
@@ -239,7 +243,7 @@ class DropboxService extends AbstractService
     			$this->getServiceLocator()->get('KofusMediaService')->clearCache($entity);
     			$this->nodes()->deleteNode($entity);
     		}
-    	}
+    	} */
     	
     	return array();
     	
