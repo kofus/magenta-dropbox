@@ -235,15 +235,14 @@ class DropboxService extends AbstractService
     	}
     
     	// Delete
-    	/*
     	foreach ($this->nodes()->getRepository($options['repository'])->findAll() as $entity) {
-    		if (! isset($entries[$entity->getDropboxEntryId()])) {
-    			print 'Deleting ' . $entity->getDropboxEntryId() . "\n";
+    		if (! isset($entries[$entity->getDropboxPath()])) {
+    			print 'Deleting ' . $entity->getDropboxPath() . "\n";
     			unlink($entity->getPath());
     			$this->getServiceLocator()->get('KofusMediaService')->clearCache($entity);
     			$this->nodes()->deleteNode($entity);
     		}
-    	} */
+    	}
     	
     	return array();
     	
