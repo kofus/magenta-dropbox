@@ -148,12 +148,15 @@ class DropboxService extends AbstractService
     	$allEntries = $this->getEntries('/IT/Junge Operette/Bilder/Dropbox-App');
     	
 
-    	foreach ($allEntries as $_entry) {
+    	foreach ($allEntries as $entry) {
     	    
-    	    $entry = $this->api('files/get_metadata', array('path' => $_entry['path_lower'], 'include_media_info' => true));
-    	    	
+    	    //$entry = $this->api('files/get_metadata', array('path' => $_entry['path_lower'], 'include_media_info' => true));
+    	    
     	    // Skip irrelevant entries according to provided validator
-   	        if (! $validator->isValid($entry)) continue;
+   	        if (! $validator->isValid($entry)) {
+   	            //print str_pad('SKIP-V', 15) . $entry['path_lower'] . "\n";
+   	            continue;
+   	        }
    	        
     		$entries[$entry['path_lower']] = $entry;
     

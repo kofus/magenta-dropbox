@@ -29,6 +29,8 @@ class IsImage extends \Zend\Validator\AbstractValidator
     		  $this->error(self::NO_FILE);
     		  $isValid = false;
     	}
+    	
+    	return $isValid;
     
     	if (! isset($entry['media_info']['metadata']['.tag'])
             || $entry['media_info']['metadata']['.tag'] != 'photo') {
