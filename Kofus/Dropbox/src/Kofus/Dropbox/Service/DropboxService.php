@@ -63,7 +63,10 @@ class DropboxService extends AbstractService
             print_r($headers->toArray()); 
             throw new \Exception('Dropbox API Exception: ' . $response->getContent());
         }
+
+        
         $body = $response->getContent();
+        
        	if ($body)
         	return Json::decode($response->getBody(), 1);
     }
@@ -93,62 +96,32 @@ class DropboxService extends AbstractService
         return $this;
     }
     
-    public function syncDownload()
-    {
-        die('sync download');
-        if (! is_dir('data/dropbox/files')) 
-        	mkdir('data/dropbox/files', 0777, true);
-        
-        $db = DropboxDb::open('data/dropbox/files.db');
-        
-        $response = $this->api('files/list_folder', array(
-        		'path' => $this->config()->get('dropbox.path', ''),
-        		'recursive' => true,
-                'include_deleted' => true,
-        		'include_media_info' => false
-        ));
-        
-        foreach ($response['entries'] as $entry) {
-            $filename = 'data/dropbox/files/' . md5($entry['path_lower']);
-            
-            if ($entry['.tag'] == 'deleted') {
-                $db->deleteLocalFile($entry);
-                if (file_exists($filename)) {
-                    unlink($filename);
-                    print 'Deleted ' . $entry['path_lower'] . '<br>';
-                }
-                
-            } elseif ($entry['.tag'] == 'file') {
-            
-                $local = $db->getLocalFile($entry['path_lower']);
-                
-                // Add + download
-                if (! $local) {
-                    $content = $this->content('files/download', array('path' => $entry['id']));
-                    file_put_contents($filename, $content);
-                    $db->addLocalFile($entry);
-                    print 'Added ' . $entry['path_lower'] . '<br>';
-                    
-                // Update + download
-                } elseif ($local && $local['modified'] < $entry['server_modified']) {
-                    $content = $this->content('files/download', array('path' => $entry['id']));
-                    file_put_contents($filename, $content);
-                    $db->updateLocalFile($entry);
-                    print 'Updated ' . $entry['path_lower'] . '<br>';
-                }
-            }
-        }
-
-        foreach ($db->getLocalFiles() as $localfile)
-            print $localfile['path'] . '<br>';
-        
-        die('DONE');
-    }
+   
     
     
     const SYNC_MODE_ADD = 2;
     const SYNC_MODE_UPDATE = 3;
     const SYNC_MODE_DELETE = 5;
+    
+    protected function getEntries($path)
+    {
+        
+        $response = $this->api('files/list_folder', array(
+        		'path' => $path,
+        		'recursive' => true,
+        		'include_media_info' => false
+        ));
+
+        $entries = $response['entries'];
+        
+        while ($response['has_more']) {
+            $response = $this->api('files/list_folder/continue', array(
+            		'cursor' => $response['cursor']
+            ));
+            $entries = array_merge($entries, $response['entries']);
+        }
+        return $entries;
+    }
     
     public function sync(array $options=array())
     {
@@ -158,11 +131,7 @@ class DropboxService extends AbstractService
         if (! isset($options['repository']))
             throw new \Exception('A media file node type must be provided for storing Dropbox files');        
         
-    	$response = $this->api('files/list_folder', array(
-    			'path' => $this->config()->get('dropbox.root_path', ''),
-    			'recursive' => true,
-    			'include_media_info' => true
-    	));
+ 
 
     	$validator = new \Zend\Validator\ValidatorChain();
     	if (isset($options['validators'])) {
@@ -176,17 +145,13 @@ class DropboxService extends AbstractService
     	$entities = array();
     	$entries = array();
     	
-    	$allEntries = $response['entries'];
-    	while ($response['has_more']) {
-    	    $response = $this->api('files/list_folder/continue', array('cursor' => $response['cursor']));
-    	    $allEntries = array_merge($allEntries, $response['entries']);
-    	}
+    	$allEntries = $this->getEntries('/IT/Junge Operette/Bilder/Dropbox-App');
     	
-    
-    	foreach ($allEntries as $entry) {
+
+    	foreach ($allEntries as $_entry) {
     	    
-    	    //print '.';
-    
+    	    $entry = $this->api('files/get_metadata', array('path' => $_entry['path_lower'], 'include_media_info' => true));
+    	    	
     	    // Skip irrelevant entries according to provided validator
    	        if (! $validator->isValid($entry)) continue;
    	        
@@ -220,6 +185,7 @@ class DropboxService extends AbstractService
     		} else {
     		    print str_pad('UPDATE', 15) . $entry['path_lower'] . "\n";
     		}
+    		
     
     		// Update entity
     		$entity->setDropboxEntryId(null)
