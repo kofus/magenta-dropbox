@@ -60,7 +60,7 @@ class DropboxService extends AbstractService
         $archive->http('dropbox')->add($client);
         
         if ($response->getStatusCode() >= 300) {
-            print_r($headers->toArray()); die();
+            print_r($headers->toArray()); 
             throw new \Exception('Dropbox API Exception: ' . $response->getContent());
         }
         $body = $response->getContent();
@@ -74,7 +74,7 @@ class DropboxService extends AbstractService
     {
         if (! $this->accessToken) {
             $settings = $this->getServiceLocator()->get('KofusSettings');
-            $this->accessToken = $settings->getSystemValue('kofus_dropbox.access_token');
+            $this->accessToken = $settings->getSystemValue('dropbox.access_token');
         }
         
         if ($throwException && ! $this->accessToken)
@@ -88,7 +88,7 @@ class DropboxService extends AbstractService
         $this->accessToken = $value;
         
         $settings = $this->getServiceLocator()->get('KofusSettings');
-        $settings->setSystemValue('kofus_dropbox.access_token', $value);
+        $settings->setSystemValue('dropbox.access_token', $value);
         
         return $this;
     }
@@ -159,11 +159,11 @@ class DropboxService extends AbstractService
             throw new \Exception('A media file node type must be provided for storing Dropbox files');        
         
     	$response = $this->api('files/list_folder', array(
-    			'path' => '',
+    			'path' => $this->config()->get('dropbox.root_path', ''),
     			'recursive' => true,
     			'include_media_info' => true
     	));
-    	
+
     	$validator = new \Zend\Validator\ValidatorChain();
     	if (isset($options['validators'])) {
     	   foreach ($options['validators'] as $array) {
@@ -175,8 +175,15 @@ class DropboxService extends AbstractService
     	$finfo = finfo_open(FILEINFO_MIME);
     	$entities = array();
     	$entries = array();
+    	
+    	$allEntries = $response['entries'];
+    	while ($response['has_more']) {
+    	    $response = $this->api('files/list_folder/continue', array('cursor' => $response['cursor']));
+    	    $allEntries = array_merge($allEntries, $response['entries']);
+    	}
+    	
     
-    	foreach ($response['entries'] as $entry) {
+    	foreach ($allEntries as $entry) {
     	    
     	    //print '.';
     

@@ -22,7 +22,7 @@ class IndexController extends AbstractActionController
         $uriDropbox = UriFactory::factory('https://www.dropbox.com/oauth2/authorize');
         $uriDropbox->setQuery(array(
         		'response_type' => 'code',
-        		'client_id' => 'pryff6oayqwpevb',
+        		'client_id' => $this->config()->get('dropbox.client_id', 'pryff6oayqwpevb'),
         ));
         $view->uriDropbox = $uriDropbox;
         
@@ -31,11 +31,12 @@ class IndexController extends AbstractActionController
             try {
                 $response = $this->dropbox()->api('files/list_folder', array(
                 		'path' => '',
-                		'recursive' => true,
+                		'recursive' => false,
                 		'include_media_info' => false
                 ));
                 $view->response = $response;
             } catch (\Exception $e) { }
+                
         }
         return $view;
         
