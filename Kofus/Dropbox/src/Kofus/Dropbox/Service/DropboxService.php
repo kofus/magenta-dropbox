@@ -218,6 +218,7 @@ class DropboxService extends AbstractService
     	}
     
     	// Delete
+    	/*
     	foreach ($this->nodes()->getRepository('DBE')->findAll() as $entryEntity) {
     		if (! isset($entities[$entryEntity->getPath()])) {
     			print 'Deleting ' . $entryEntity->getPath() . ' ' . $fileEntity->getTitle() . ' ' . $fileEntity->getPath() . PHP_EOL;
@@ -228,7 +229,7 @@ class DropboxService extends AbstractService
     			$this->nodes()->deleteNode($fileEntity);
     		}
     	}
-    	
+    	*/
     	return array();
     	
     }
