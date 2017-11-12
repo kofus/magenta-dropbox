@@ -20,7 +20,7 @@ class DropboxService extends AbstractService
         'content' => 'https://content.dropboxapi.com/2/'
     );
     
-    public function content($method, array $params=array(), $streamFilename=true)
+    public function content($method, array $params=array(), $streamFilename=null)
     {
         $client = $this->getHttpClient();
         $client->setUri($this->apiUrls['content'] . '/' . $method);
@@ -166,15 +166,15 @@ class DropboxService extends AbstractService
     		print str_pad('DOWNLOAD', 15) . $entry['path_lower'] . "\n";
     
     		$filename = 'data/media/files/' . md5($entry['path_lower']);
-    		$content = $this->content('files/download', array('path' => $entry['path_lower']));
     		if (! is_dir(dirname($filename))) {
     		    $success = mkdir(dirname($filename), 0777, true);
     		    if ($success === false)
     		        throw new \Exception('Could not create directory ' . dirname($filename));
     		}
-    		$success = file_put_contents($filename, $content);
-    		if ($success === false)
-    		    throw new \Exception('Could not write file ' . $filename);
+    		$this->content('files/download', array('path' => $entry['path_lower']), $filename);
+    		//$success = file_put_contents($filename, $content);
+    		//if ($success === false)
+    		    //throw new \Exception('Could not write file ' . $filename);
     		$mimeType = finfo_file($finfo, $filename);
     		
     		
