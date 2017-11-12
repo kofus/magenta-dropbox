@@ -220,13 +220,8 @@ class DropboxService extends AbstractService
     	// Delete
     	foreach ($this->nodes()->getRepository('DBE')->findAll() as $entryEntity) {
     		if (! isset($entities[$entryEntity->getPath()])) {
-    			print 'Deleting ' . $entryEntity->getPath() . PHP_EOL;
-    			unlink($entryEntity->getPath());
-    			$fileEntity = $entryEntity->getFile();
-    			if ($fileEntity) {
-                    print 'Deleting' . $fileEntity->getTitle() . PHP_EOL;
-                    unlink($fileEntity->getPath());
-    			}
+    			print 'Deleting ' . $entryEntity->getPath() . ' ' . $fileEntity->getTitle() . ' ' . $fileEntity->getPath() . PHP_EOL;
+                unlink($fileEntity->getPath());
     			
     			$this->getServiceLocator()->get('KofusMediaService')->clearCache($fileEntity);
     			$this->nodes()->deleteNode($entryEntity);
