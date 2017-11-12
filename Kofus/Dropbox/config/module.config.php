@@ -5,13 +5,11 @@ return array(
     
     'controllers' => array(
         'invokables' => array(
-            'Kofus\Dropbox\Controller\Browser' => 'Kofus\Dropbox\Controller\BrowserController',
             'Kofus\Dropbox\Controller\Index' => 'Kofus\Dropbox\Controller\IndexController',
         )
     ),
     'user' => array(
         'controller_mappings' => array(
-            'Kofus\Dropbox\Controller\Browser' => 'KofusDropbox',
             'Kofus\Dropbox\Controller\Index' => 'KofusDropbox',
         )
     ),
