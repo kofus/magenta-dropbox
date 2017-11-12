@@ -20,7 +20,7 @@ class DropboxService extends AbstractService
         'content' => 'https://content.dropboxapi.com/2/'
     );
     
-    public function content($method, array $params=array(), $streamFilename=null)
+    public function content($method, array $params=array(), $streamFilename=true)
     {
         $client = $this->getHttpClient();
         $client->setUri($this->apiUrls['content'] . '/' . $method);
