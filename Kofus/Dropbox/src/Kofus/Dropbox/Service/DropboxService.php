@@ -219,7 +219,7 @@ class DropboxService extends AbstractService
     
     	// Delete
     	foreach ($this->nodes()->getRepository('DBE')->findAll() as $entryEntity) {
-    		if (! isset($entries[$entryEntity->getPath()])) {
+    		if (! isset($entities[$entryEntity->getPath()])) {
     			print 'Deleting ' . $entryEntity->getPath() . PHP_EOL;
     			unlink($entryEntity->getPath());
     			$fileEntity = $entryEntity->getFile();
