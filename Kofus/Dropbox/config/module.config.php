@@ -5,12 +5,12 @@ return array(
     
     'controllers' => array(
         'invokables' => array(
-            'Kofus\Dropbox\Controller\Index' => 'Kofus\Dropbox\Controller\IndexController',
+            'Kofus\Dropbox\Controller\Auth' => 'Kofus\Dropbox\Controller\AuthController',
         )
     ),
     'user' => array(
         'controller_mappings' => array(
-            'Kofus\Dropbox\Controller\Index' => 'KofusDropbox',
+            'Kofus\Dropbox\Controller\Auth' => 'KofusDropbox',
         )
     ),
     

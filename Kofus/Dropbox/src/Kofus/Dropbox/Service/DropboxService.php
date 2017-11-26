@@ -20,6 +20,23 @@ class DropboxService extends AbstractService
         'content' => 'https://content.dropboxapi.com/2/'
     );
     
+    public function oauth2(array $params=array())
+    {
+        if (! $this->config()->get('dropbox.app_key') || ! $this->config()->get('dropbox.app_secret'))
+            throw new \Exception('Dropbox app_key and app_secret must be provided in config');
+        
+        $client = $this->getHttpClient();
+        $client->setUri('https://api.dropboxapi.com/oauth2/token');
+        $client->setMethod('POST');
+        $client->setAuth($this->config()->get('dropbox.app_key'), $this->config()->get('dropbox.app_secret'));
+        $client->setParameterPost($params);
+        $response = $client->send();
+        if ($response->getStatusCode() >= 300)
+            throw new \Exception('Dropbox API Exception: ' . $response->getContent());
+        
+        return Json::decode($response->getBody(), 1);
+    }
+    
     public function content($method, array $params=array(), $streamFilename=null)
     {
         $client = $this->getHttpClient();
@@ -89,14 +106,10 @@ class DropboxService extends AbstractService
     public function setAccessToken($value)
     {
         $this->accessToken = $value;
-        
         $settings = $this->getServiceLocator()->get('KofusSettings');
         $settings->setSystemValue('dropbox.access_token', $value);
-        
         return $this;
     }
-    
-   
     
     
     const SYNC_MODE_ADD = 2;
@@ -126,8 +139,8 @@ class DropboxService extends AbstractService
     public function sync(array $options=array())
     {
         // Deploy option defaults
-        if (! isset($options['mode'])) 
-            $options['mode'] = self::SYNC_MODE_ADD * self::SYNC_MODE_UPDATE;
+        //if (! isset($options['mode'])) 
+          //  $options['mode'] = self::SYNC_MODE_ADD * self::SYNC_MODE_UPDATE;
         if (! isset($options['repository']))
             throw new \Exception('A media file node type must be provided for storing Dropbox files');        
         
@@ -145,7 +158,9 @@ class DropboxService extends AbstractService
     	$entities = array();
     	$entries = array();
     	
-    	$allEntries = $this->getEntries('/IT/Junge Operette/Bilder/Dropbox-App');
+    	if (! isset($options['path']))
+    	    throw new \Exception('A dropbox path must be provided');
+    	$allEntries = $this->getEntries($options['path']);
     	
 
     	foreach ($allEntries as $entry) {

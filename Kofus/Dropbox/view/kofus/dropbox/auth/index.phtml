@@ -1,0 +1,14 @@
+<h1>Dropbox</h1>
+
+<?php if ($this->accessToken) : ?>
+	<p>Es existiert bereits eine Verknüpfung mit einem Dropbox-Account.</p>
+<?php endif ?>
+
+
+<h2>Neue Dropbox-Verknüpfung</h2>
+<a href="<?php echo $this->escapeHtmlAttr($this->uri) ?>" target="_blank">
+	Freischalt-Code beantragen
+</a>
+
+
+<?php echo $this->form($this->form) ?>
