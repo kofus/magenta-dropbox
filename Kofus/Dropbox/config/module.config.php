@@ -5,12 +5,12 @@ return array(
     
     'controllers' => array(
         'invokables' => array(
-            'Kofus\Dropbox\Controller\Auth' => 'Kofus\Dropbox\Controller\AuthController',
+            'Kofus\Dropbox\Controller\Auth' => 'Kofus\Dropbox\Controller\AuthController'
         )
     ),
     'user' => array(
         'controller_mappings' => array(
-            'Kofus\Dropbox\Controller\Auth' => 'KofusDropbox',
+            'Kofus\Dropbox\Controller\Auth' => 'KofusDropbox'
         )
     ),
     
@@ -27,7 +27,7 @@ return array(
                         'language' => 'de',
                         '__NAMESPACE__' => 'Kofus\Dropbox\Controller',
                         'controller' => 'index',
-                        'action' => 'index',
+                        'action' => 'index'
                     )
                 )
             )
@@ -59,7 +59,7 @@ return array(
                 )
             )
         )
-    ), 
+    ),
     
     'controller_plugins' => array(
         'invokables' => array(
@@ -70,7 +70,7 @@ return array(
     'service_manager' => array(
         'invokables' => array(
             'KofusDropboxService' => 'Kofus\Dropbox\Service\DropboxService',
-            'KofusDropboxSyncCron' => 'Kofus\Dropbox\Cron\DropboxSyncCron',
+            'KofusDropboxSyncCron' => 'Kofus\Dropbox\Cron\DropboxSyncCron'
         )
     ),
     
@@ -83,6 +83,11 @@ return array(
         ),
         'template_path_stack' => array(
             __DIR__ . '/../view'
+        )
+    ),
+    'view_helpers' => array(
+        'invokables' => array(
+            'dropbox' => 'Kofus\Dropbox\View\Helper\DropboxHelper'
         )
     )
 );
