@@ -155,22 +155,20 @@ class DropboxService extends AbstractService
     	}
     
     	$finfo = finfo_open(FILEINFO_MIME);
-    	$entities = array();
-    	$entries = array();
     	
     	if (! isset($options['path']))
     	    throw new \Exception('A dropbox path must be provided');
-    	$allEntries = $this->getEntries($options['path']);
+    	$allEntries = array();
     	
 
-    	foreach ($allEntries as $entry) {
+    	foreach ($this->getEntries($options['path']) as $entry) {
+    	    
+    	    $allEntries[$entry['path_lower']] = $entry;
     	    
     	    // Skip irrelevant entries according to provided validator
    	        if (! $validator->isValid($entry)) 
    	            continue;
    	        
-    		$entries[$entry['path_lower']] = $entry;
-    
     		$entryEntity = $this->nodes()->getRepository('DBE')->findOneBy(array('path' => $entry['path_lower']));
     		if (! $entryEntity)
     		    $entryEntity = $this->nodes()->createNode('DBE');
@@ -227,16 +225,18 @@ class DropboxService extends AbstractService
     		$this->em()->persist($fileEntity);
     		$this->em()->persist($entryEntity);
     		$this->em()->flush();
-    		
-    		 
-    		$entities[$entry['path_lower']] = $entryEntity;
     	}
     
     	// Delete
-    	/*
     	foreach ($this->nodes()->getRepository('DBE')->findAll() as $entryEntity) {
-    		if (! isset($entities[$entryEntity->getPath()])) {
-    			print 'Deleting ' . $entryEntity->getPath() . ' ' . $fileEntity->getTitle() . ' ' . $fileEntity->getPath() . PHP_EOL;
+    	    
+    	    if (strpos($entryEntity->getpath(), $options['path']) !== 0)
+    	        continue;
+    	    
+    		if (! isset($allEntries[$entryEntity->getPath()])) {
+    		    $fileEntity = $entryEntity->getFile();
+    		    
+    			print 'Deleting ' . $entryEntity->getPath() . PHP_EOL;
                 unlink($fileEntity->getPath());
     			
     			$this->getServiceLocator()->get('KofusMediaService')->clearCache($fileEntity);
@@ -244,7 +244,6 @@ class DropboxService extends AbstractService
     			$this->nodes()->deleteNode($fileEntity);
     		}
     	}
-    	*/
     	return array();
     	
     }
