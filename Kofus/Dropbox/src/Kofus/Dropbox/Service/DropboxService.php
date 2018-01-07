@@ -236,7 +236,7 @@ class DropboxService extends AbstractService
     		if (! isset($allEntries[$entryEntity->getPath()])) {
     		    $fileEntity = $entryEntity->getFile();
     		    
-    			print 'Deleting ' . $entryEntity->getPath() . PHP_EOL;
+    			print 'DELETE ' . $entryEntity->getPath() . PHP_EOL;
                 unlink($fileEntity->getPath());
     			
     			$this->getServiceLocator()->get('KofusMediaService')->clearCache($fileEntity);
